@@ -28,6 +28,13 @@ To use this project, copy it to a new project and take the following steps:
 mvn test -P testWithWorldPainter
 ```
 
+## Debugging
+With Intellij:
+- run mvn test -P testWithWorldPainter (be sure the POM.xml has the option <argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</argument> uncommented
+- add a intellij run configureation for "Remote JVM Debug", default settings should attach to localhost:5005
+- execute the debug config once worldpainter process runs.
+  
+
 ## Notes
 
 **Note** that these classes are empty skeletons that don't actually _do_ anything. They are here only to illustrate the required structure of the code.
