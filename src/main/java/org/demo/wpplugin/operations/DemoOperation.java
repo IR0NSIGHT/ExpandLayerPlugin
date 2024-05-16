@@ -6,6 +6,7 @@ import org.pepsoft.worldpainter.operations.*;
 import org.pepsoft.worldpainter.painting.Paint;
 import org.pepsoft.worldpainter.panels.DefaultFilter;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
@@ -45,6 +46,18 @@ public class DemoOperation extends MouseOrTabletOperation implements
         // super(NAME, DESCRIPTION, delay, ID);
     }
 
+    private static boolean isFrosted(int x, int y, int thisHeight, int minHeight, int transitionHeight) {
+        if (thisHeight >= minHeight + transitionHeight)
+            return true;
+        if (thisHeight < minHeight)
+            return false;
+        float point = (thisHeight - minHeight) * 1f / transitionHeight;
+
+        //Random r = new Random((long) x + y);
+        float rand = (float)Math.random();
+        return (rand < point);
+    }
+
     /**
      * Perform the operation. For single shot operations this is invoked once per mouse-down. For continuous operations
      * this is invoked once per {@code delay} ms while the mouse button is down, with the first invocation having
@@ -76,31 +89,14 @@ public class DemoOperation extends MouseOrTabletOperation implements
         // * brush - the currently selected brush
         // * paint - the currently selected paint
 
-
-        DefaultFilter filter = DefaultFilter.buildForDimension(getDimension()).aboveLevel(120).build();
-
-        System.out.println("filter:" + filter);
-
-        AtomicInteger i = new AtomicInteger();
-
-        getDimension().visitTilesForEditing().forFilter(filter).andDo(tile -> {
-            i.getAndIncrement();
-            System.out.println("visit tile:" + tile.toString());
+        getDimension().visitTilesForEditing().andDo(tile -> {
             for (int x = 0; x < TILE_SIZE; x++) {
                 for (int y = 0; y < TILE_SIZE; y++) {
-                    if (tile.getIntHeight(x, y) < filter.getAboveLevel() )
-                        return;
-
-                    try {
+                    if (isFrosted(x, y, tile.getIntHeight(x, y), 120, 100))
                         tile.setBitLayerValue(Frost.INSTANCE, x, y, true);
-                    } catch (IllegalArgumentException ex) {
-                        System.err.println("illegal arg: tile " + tile.toString() + " coord " + x + " " + y + " ex: " + ex.getStackTrace());
-                    }
                 }
             }
         });
-        System.out.println("finished. processed " + i + " matching tiles");
-
     }
 
     @Override
