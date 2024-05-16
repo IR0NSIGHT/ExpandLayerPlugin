@@ -44,6 +44,7 @@ public class DemoWPPlugin extends AbstractPlugin implements
      */
     public DemoWPPlugin() {
         super(NAME, VERSION);
+        System.out.println("hello world i am the demo wp plugin");
     }
 
     // LayerProvider

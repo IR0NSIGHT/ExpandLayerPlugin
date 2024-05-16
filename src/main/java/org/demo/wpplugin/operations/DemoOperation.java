@@ -1,8 +1,14 @@
 package org.demo.wpplugin.operations;
 
 import org.pepsoft.worldpainter.brushes.Brush;
+import org.pepsoft.worldpainter.layers.Frost;
 import org.pepsoft.worldpainter.operations.*;
 import org.pepsoft.worldpainter.painting.Paint;
+import org.pepsoft.worldpainter.panels.DefaultFilter;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
 
 /**
  * For any operation that is intended to be applied to the dimension in a particular location as indicated by the user
@@ -69,6 +75,32 @@ public class DemoOperation extends MouseOrTabletOperation implements
         // In addition you have the following fields in this class:
         // * brush - the currently selected brush
         // * paint - the currently selected paint
+
+
+        DefaultFilter filter = DefaultFilter.buildForDimension(getDimension()).aboveLevel(120).build();
+
+        System.out.println("filter:" + filter);
+
+        AtomicInteger i = new AtomicInteger();
+
+        getDimension().visitTilesForEditing().forFilter(filter).andDo(tile -> {
+            i.getAndIncrement();
+            System.out.println("visit tile:" + tile.toString());
+            for (int x = 0; x < TILE_SIZE; x++) {
+                for (int y = 0; y < TILE_SIZE; y++) {
+                    if (tile.getIntHeight(x, y) < filter.getAboveLevel() )
+                        return;
+
+                    try {
+                        tile.setBitLayerValue(Frost.INSTANCE, x, y, true);
+                    } catch (IllegalArgumentException ex) {
+                        System.err.println("illegal arg: tile " + tile.toString() + " coord " + x + " " + y + " ex: " + ex.getStackTrace());
+                    }
+                }
+            }
+        });
+        System.out.println("finished. processed " + i + " matching tiles");
+
     }
 
     @Override
