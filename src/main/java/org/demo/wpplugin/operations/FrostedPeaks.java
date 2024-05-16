@@ -4,10 +4,6 @@ import org.pepsoft.worldpainter.brushes.Brush;
 import org.pepsoft.worldpainter.layers.Frost;
 import org.pepsoft.worldpainter.operations.*;
 import org.pepsoft.worldpainter.painting.Paint;
-import org.pepsoft.worldpainter.panels.DefaultFilter;
-
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
 
@@ -31,11 +27,11 @@ import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
  *
  * <p><strong>Note</strong> that for now WorldPainter only supports operations that
  */
-public class DemoOperation extends MouseOrTabletOperation implements
+public class FrostedPeaks extends MouseOrTabletOperation implements
         PaintOperation, // Implement this if you need access to the currently selected paint; note that some base classes already provide this
         BrushOperation // Implement this if you need access to the currently selected brush; note that some base classes already provide this
 {
-    public DemoOperation() {
+    public FrostedPeaks() {
         // Using this constructor will create a "single shot" operation. The tick() method below will only be invoked
         // once for every time the user clicks the mouse or presses on the tablet:
         super(NAME, DESCRIPTION, ID);
@@ -89,14 +85,18 @@ public class DemoOperation extends MouseOrTabletOperation implements
         // * brush - the currently selected brush
         // * paint - the currently selected paint
 
-        getDimension().visitTilesForEditing().andDo(tile -> {
-            for (int x = 0; x < TILE_SIZE; x++) {
-                for (int y = 0; y < TILE_SIZE; y++) {
-                    if (isFrosted(x, y, tile.getIntHeight(x, y), 120, 100))
-                        tile.setBitLayerValue(Frost.INSTANCE, x, y, true);
+        if (inverse) {
+            System.out.println("right click => configure");
+        } else {
+            getDimension().visitTilesForEditing().andDo(tile -> {
+                for (int x = 0; x < TILE_SIZE; x++) {
+                    for (int y = 0; y < TILE_SIZE; y++) {
+                        if (isFrosted(x, y, tile.getIntHeight(x, y), 120, 100))
+                            tile.setBitLayerValue(Frost.INSTANCE, x, y, true);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -126,15 +126,15 @@ public class DemoOperation extends MouseOrTabletOperation implements
      * The globally unique ID of the operation. It's up to you what to use here. It is not visible to the user. It can
      * be a FQDN or package and class name, like here, or you could use a UUID. As long as it is globally unique.
      */
-    static final String ID = "org.demo.wpplugin.DemoOperation.v1";
+    static final String ID = "org.demo.wpplugin.FrostedPeaks.v1";
 
     /**
      * Human-readable short name of the operation.
      */
-    static final String NAME = "Demo Operation";
+    static final String NAME = "Frosted Peaks";
 
     /**
      * Human-readable description of the operation. This is used e.g. in the tooltip of the operation selection button.
      */
-    static final String DESCRIPTION = "A demonstration of creating a custom operation plugin for WorldPainter";
+    static final String DESCRIPTION = "Globally apply a layer of frost starting at level 120, with a smooth transition";
 }
