@@ -88,7 +88,7 @@ public class FrostedPeaks extends MouseOrTabletOperation implements
 
         if (inverse) {
             System.out.println("right click => configure");
-            //popup();
+            popup();
         } else {
             getDimension().visitTilesForEditing().andDo(tile -> {
                 for (int x = 0; x < TILE_SIZE; x++) {
