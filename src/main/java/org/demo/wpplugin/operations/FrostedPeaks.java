@@ -3,8 +3,11 @@ package org.demo.wpplugin.operations;
 import org.pepsoft.worldpainter.App;
 import org.pepsoft.worldpainter.WorldPainterDialog;
 import org.pepsoft.worldpainter.layers.Frost;
+import org.pepsoft.worldpainter.operations.Filter;
 import org.pepsoft.worldpainter.operations.MouseOrTabletOperation;
+import org.pepsoft.worldpainter.operations.PaintOperation;
 import org.pepsoft.worldpainter.operations.StandardOptionsPanel;
+import org.pepsoft.worldpainter.painting.Paint;
 
 import javax.swing.*;
 import java.util.Random;
@@ -16,7 +19,7 @@ import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
  * frost - no-frost will have a smooth, random and deterministic transition
  * Right click to configure the tool
  */
-public class FrostedPeaks extends MouseOrTabletOperation
+public class FrostedPeaks extends MouseOrTabletOperation implements PaintOperation
 {
     public FrostedPeaks() {
         super(NAME, DESCRIPTION, null, ID, "frostedPeaksIcon");
@@ -47,6 +50,9 @@ public class FrostedPeaks extends MouseOrTabletOperation
             System.out.println("right click => configure");
             popup();
         } else {
+
+            Filter f = paint.getFilter();
+
             getDimension().visitTilesForEditing().andDo(tile -> {
                 Random r = new Random((long) tile.getX()+tile.getY());
 
@@ -83,5 +89,14 @@ public class FrostedPeaks extends MouseOrTabletOperation
      */
     static final String DESCRIPTION = "Globally apply a layer of frost starting at level 120, with a smooth transition";
 
+    private Paint paint;
+    @Override
+    public Paint getPaint() {
+        return paint;
+    }
 
+    @Override
+    public void setPaint(Paint paint) {
+        this.paint = paint;
+    }
 }
