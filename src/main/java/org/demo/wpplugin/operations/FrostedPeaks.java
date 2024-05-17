@@ -4,7 +4,9 @@ import org.pepsoft.worldpainter.App;
 import org.pepsoft.worldpainter.WorldPainterDialog;
 import org.pepsoft.worldpainter.layers.Frost;
 import org.pepsoft.worldpainter.operations.MouseOrTabletOperation;
+import org.pepsoft.worldpainter.operations.StandardOptionsPanel;
 
+import javax.swing.*;
 import java.util.Random;
 
 import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
@@ -19,6 +21,13 @@ public class FrostedPeaks extends MouseOrTabletOperation
     public FrostedPeaks() {
         super(NAME, DESCRIPTION, null, ID, "frostedPeaksIcon");
         System.out.println("icon name of frosted peaks:"+ this.getIcon());
+    }
+
+    private final StandardOptionsPanel optionsPanel = new StandardOptionsPanel(NAME, "<p>Left-Click to apply frost to all mountain peaks with a smooth transition.<br>Right-Click for configuration.<br>by Ir0nsight<p>");
+
+    @Override
+    public JPanel getOptionsPanel() {
+        return optionsPanel;
     }
 
     private static boolean isFrosted(int x, int y, int thisHeight, int minHeight, int transitionHeight, Random r) {
