@@ -8,7 +8,7 @@ import org.pepsoft.worldpainter.layers.Frost;
 import org.pepsoft.worldpainter.operations.*;
 import org.pepsoft.worldpainter.painting.Paint;
 
-import javax.swing.*;
+import java.util.Random;
 
 import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
 
@@ -43,15 +43,14 @@ public class FrostedPeaks extends MouseOrTabletOperation implements
         System.out.println("icon name of frosted peaks:"+ this.getIcon());
     }
 
-    private static boolean isFrosted(int x, int y, int thisHeight, int minHeight, int transitionHeight) {
+    private static boolean isFrosted(int x, int y, int thisHeight, int minHeight, int transitionHeight, Random r) {
         if (thisHeight >= minHeight + transitionHeight)
             return true;
         if (thisHeight < minHeight)
             return false;
         float point = (thisHeight - minHeight) * 1f / transitionHeight;
 
-        //Random r = new Random((long) x + y);
-        float rand = (float)Math.random();
+        float rand = r.nextFloat();
         return (rand < point);
     }
 
@@ -91,9 +90,11 @@ public class FrostedPeaks extends MouseOrTabletOperation implements
             popup();
         } else {
             getDimension().visitTilesForEditing().andDo(tile -> {
+                Random r = new Random((long) tile.getX()+tile.getY());
+
                 for (int x = 0; x < TILE_SIZE; x++) {
                     for (int y = 0; y < TILE_SIZE; y++) {
-                        if (isFrosted(x, y, tile.getIntHeight(x, y), 120, 100))
+                        if (isFrosted(x, y, tile.getIntHeight(x, y), 120, 100,r))
                             tile.setBitLayerValue(Frost.INSTANCE, x, y, true);
                     }
                 }
