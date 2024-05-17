@@ -26,9 +26,6 @@ import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
 public class FrostedPeaks extends MouseOrTabletOperation implements PaintOperation {
         public FrostedPeaks() {
         super(NAME, DESCRIPTION, null, ID);
-
-        System.out.println(NAME + " -> icon name of frosted peaks:" + this.getIcon());
-
     }
 
     private final StandardOptionsPanel optionsPanel = new StandardOptionsPanel(NAME,
