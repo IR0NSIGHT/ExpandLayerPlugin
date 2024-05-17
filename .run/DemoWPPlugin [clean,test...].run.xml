@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DemoWPPlugin [clean,test]" type="MavenRunConfiguration" factoryName="Maven" activateToolWindowBeforeRun="false" nameIsGenerated="true">
+  <configuration default="false" name="DemoWPPlugin [clean,test...]" type="MavenRunConfiguration" factoryName="Maven" activateToolWindowBeforeRun="false" singleton="false" nameIsGenerated="true">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
@@ -13,6 +13,7 @@
             <list>
               <option value="clean" />
               <option value="test" />
+              <option value="-Dmaven.surefire.debug" />
             </list>
           </option>
           <option name="pomFileName" />
