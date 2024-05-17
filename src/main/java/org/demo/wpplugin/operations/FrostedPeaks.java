@@ -1,17 +1,18 @@
 package org.demo.wpplugin.operations;
 
 import org.pepsoft.worldpainter.App;
-import org.pepsoft.worldpainter.MapDragControl;
 import org.pepsoft.worldpainter.WorldPainterDialog;
-import org.pepsoft.worldpainter.WorldPainterView;
 import org.pepsoft.worldpainter.layers.Frost;
-import org.pepsoft.worldpainter.operations.*;
+import org.pepsoft.worldpainter.operations.Filter;
+import org.pepsoft.worldpainter.operations.MouseOrTabletOperation;
+import org.pepsoft.worldpainter.operations.PaintOperation;
+import org.pepsoft.worldpainter.operations.StandardOptionsPanel;
 import org.pepsoft.worldpainter.painting.Paint;
 import org.pepsoft.worldpainter.panels.DefaultFilter;
+import org.pepsoft.worldpainter.selection.SelectionBlock;
+import org.pepsoft.worldpainter.selection.SelectionChunk;
 
 import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.beans.PropertyVetoException;
 import java.lang.reflect.Field;
 import java.util.Random;
 
@@ -33,8 +34,9 @@ public class FrostedPeaks extends MouseOrTabletOperation implements PaintOperati
     private final StandardOptionsPanel optionsPanel = new StandardOptionsPanel(NAME,
             "<p>Left-Click to apply frost to all mountain peaks with a smooth transition.<br>" +
                     "0% frost at height 'at or above'.<br>" +
-                    "100% frost at height 'at or below.<br>" +
+                    "100% frost at height 'at or below'.<br>" +
                     "Linear transition inbetween both heights.<br>" +
+                    "Use 'inside selection' to restrict where tool applies.<br>" +
                     "Will ignore other filters.<br>" +
                     "by Ir0nsight<p>");
 
@@ -82,22 +84,33 @@ public class FrostedPeaks extends MouseOrTabletOperation implements PaintOperati
 
             Filter f = getAppFilter(App.getInstance());
 
-            final int minHeight = (f instanceof DefaultFilter) ? ((DefaultFilter) f).getAboveLevel() : Integer.MIN_VALUE;
+            if (!(f instanceof DefaultFilter))
+                return;
 
-            final int fullHeight = (f instanceof DefaultFilter) ? ((DefaultFilter) f).getBelowLevel() : minHeight + 50;
+            final int minHeight = ((DefaultFilter) f).getAboveLevel();
 
+            final int fullHeight = ((DefaultFilter) f).getBelowLevel();
 
             getDimension().visitTilesForEditing().andDo(tile -> {
                 Random r = new Random((long) tile.getX()+tile.getY());
 
+                int xTile = tile.getX() * TILE_SIZE, yTile = tile.getY() * TILE_SIZE;
+
                 for (int x = 0; x < TILE_SIZE; x++) {
                     for (int y = 0; y < TILE_SIZE; y++) {
+                        //filter out point if Filter requires to be inside selection
+                        if (((DefaultFilter) f).isInSelection() && !absCoordInSelection(xTile + x, yTile + y))
+                            continue;
                         if (isFrosted(x, y, tile.getIntHeight(x, y), minHeight, fullHeight - minHeight, r))
                             tile.setBitLayerValue(Frost.INSTANCE, x, y, true);
                     }
                 }
             });
         }
+    }
+
+    private boolean absCoordInSelection(int x, int y) {
+        return getDimension().getBitLayerValueAt(SelectionChunk.INSTANCE, x, y) || getDimension().getBitLayerValueAt(SelectionBlock.INSTANCE, x, y);
     }
 
     public void popup() {
