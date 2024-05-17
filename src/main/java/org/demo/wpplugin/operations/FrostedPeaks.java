@@ -1,9 +1,14 @@
 package org.demo.wpplugin.operations;
 
+import org.pepsoft.worldpainter.App;
+import org.pepsoft.worldpainter.WorldPainterDialog;
+import org.pepsoft.worldpainter.WorldPainterView;
 import org.pepsoft.worldpainter.brushes.Brush;
 import org.pepsoft.worldpainter.layers.Frost;
 import org.pepsoft.worldpainter.operations.*;
 import org.pepsoft.worldpainter.painting.Paint;
+
+import javax.swing.*;
 
 import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
 
@@ -32,14 +37,10 @@ public class FrostedPeaks extends MouseOrTabletOperation implements
         BrushOperation // Implement this if you need access to the currently selected brush; note that some base classes already provide this
 {
     public FrostedPeaks() {
-        // Using this constructor will create a "single shot" operation. The tick() method below will only be invoked
-        // once for every time the user clicks the mouse or presses on the tablet:
-        super(NAME, DESCRIPTION, ID);
-        // Using this constructor instead will create a continues operation. The tick() method will be invoked once
-        // every "delay" ms while the user has the mouse button down or continues pressing on the tablet. The "first"
-        // parameter will be true for the first invocation per mouse button press and false for every subsequent
-        // invocation:
-        // super(NAME, DESCRIPTION, delay, ID);
+
+        //super(NAME, DESCRIPTION, ID);
+        super(NAME, DESCRIPTION, (WorldPainterView)null, ID, "frostedPeaksIcon");
+        System.out.println("icon name of frosted peaks:"+ this.getIcon());
     }
 
     private static boolean isFrosted(int x, int y, int thisHeight, int minHeight, int transitionHeight) {
@@ -87,6 +88,7 @@ public class FrostedPeaks extends MouseOrTabletOperation implements
 
         if (inverse) {
             System.out.println("right click => configure");
+            //popup();
         } else {
             getDimension().visitTilesForEditing().andDo(tile -> {
                 for (int x = 0; x < TILE_SIZE; x++) {
@@ -97,6 +99,12 @@ public class FrostedPeaks extends MouseOrTabletOperation implements
                 }
             });
         }
+    }
+
+    public void popup() {
+        WorldPainterDialog dialog = new ConfigurationDialog(App.getInstance());
+        dialog.setLocationRelativeTo(App.getInstance());
+        dialog.setVisible(true);
     }
 
     @Override
@@ -137,4 +145,6 @@ public class FrostedPeaks extends MouseOrTabletOperation implements
      * Human-readable description of the operation. This is used e.g. in the tooltip of the operation selection button.
      */
     static final String DESCRIPTION = "Globally apply a layer of frost starting at level 120, with a smooth transition";
+
+
 }
