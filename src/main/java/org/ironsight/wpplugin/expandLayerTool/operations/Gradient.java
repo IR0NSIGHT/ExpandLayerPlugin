@@ -13,6 +13,9 @@ public class Gradient {
     }
 
     public float getValue(float x) {
+        if (values.length == 0) {
+            return 0;
+        }
         int idx = Arrays.binarySearch(positions, x);
         if (idx < 0) {
             idx = -idx - 1;
