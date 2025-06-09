@@ -17,6 +17,13 @@ Its comparable to chaining many global operations, and be able to save that work
 6. place the downloaded jar file in the folder
 7. restart worldpainter
 
+# MACRO MACHINE IS IN AN EXPERIMENTAL STATE
+- the current 0.0.1 release is an alpha version
+- it can not use custom layers yet
+- it might be unstable / break
+- right now, use it for generating masks only please, f.e. paint annotation cyan everywhere you want forest, then use global operations to apply forest on the cyan annotations.
+- im working on the next update and im confident i can deliver in the coming days/weeks
+
 ## Use Macros
 1. Find the Macro tool and left click it. The macro panel will open.  
 ![tool](macromachine_tool.PNG)
