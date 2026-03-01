@@ -4,7 +4,7 @@ This plugin allows you to automatically select the edge of a layer and apply a g
 
 ![grafik](https://github.com/user-attachments/assets/4359b455-85a7-4b47-93a2-837773a71523)
 
-NOTE: if you are looking for the fractal expandlayer script go here=> (github expandlayer script)[https://github.com/IR0NSIGHT/ExpandLayer]
+NOTE: if you are looking for the fractal expandlayer script go here=> [github expandlayer script](https://github.com/IR0NSIGHT/ExpandLayer)
 
 ## Download
 1. go to the [release page](https://github.com/IR0NSIGHT/ExpandLayerPlugin/releases)
