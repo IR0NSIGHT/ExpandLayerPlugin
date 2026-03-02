@@ -17,7 +17,7 @@ public class Version {
         Properties versionProps = new Properties();
         try {
             versionProps.load(Version.class.getResourceAsStream("/org.ironsight.wpplugin.expandLayerTool.properties"));
-            VERSION = versionProps.getProperty("orig.ironsight.wpplugin.expandLayerTool.version");
+            VERSION = versionProps.getProperty("org.ironsight.wpplugin.expandLayerTool.version");
         } catch (IOException e) {
             throw new RuntimeException("I/O error loading version number from classpath", e);
         }

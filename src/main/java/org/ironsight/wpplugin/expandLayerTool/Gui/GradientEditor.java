@@ -17,8 +17,6 @@ public class GradientEditor extends JPanel {
     private Gradient gradient;
     private boolean invalid;
     private boolean blockEventhandling;
-    private JTextField[] positionTextFields;
-    private JTextField[] valueTextFields;
     private NumericSlider[] valueSliders;
     private NumericSlider[] positionSliders;
 
@@ -27,6 +25,19 @@ public class GradientEditor extends JPanel {
         this.update = update;
         this.submit = submit;
         setup();
+    }
+
+    public static void main(String[] args) {
+        Gradient grad = new Gradient(new float[]{1,2,3,4,5},new float[]{10,20,30,40,50});
+        GradientEditor editor = new GradientEditor(grad,
+                g -> { System.out.println("UPDATE GRADIENT: " + g)        ;},
+                g -> { System.out.println("SUBMIT GRADIENT: " + g)        ;});
+        JFrame frame = new JFrame("gradient editor test");
+        frame.add(editor);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 
     private void setup() {
@@ -180,38 +191,4 @@ public class GradientEditor extends JPanel {
         //trigger input update
         SwingUtilities.invokeLater(() -> updateGradient(gradient));
     }
-
-    private void onValueInputChange() {
-        if (blockEventhandling) return;
-        for (int i = 0; i < gradient.positions.length; i++) {
-            try {
-                float value = Float.parseFloat(valueTextFields[i].getText()) / 100f;
-                if (value < 0) value = 0;
-                if (value > 1) value = 1;
-                gradient.values[i] = value;
-
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        //trigger input update
-        SwingUtilities.invokeLater(() -> updateGradient(gradient));
-
-    }
-
-    private void onPointInputChange() {
-        if (blockEventhandling) return;
-        for (int i = 0; i < gradient.positions.length; i++) {
-            try {
-                float value = Float.parseFloat(positionTextFields[i].getText()) / 100f;
-                if (value < 0) value = 0;
-                if (value > 1) value = 1;
-                gradient.positions[i] = value;
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        //trigger input update
-        SwingUtilities.invokeLater(() -> updateGradient(gradient));
-    }
-
-
 }

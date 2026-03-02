@@ -1,7 +1,6 @@
 package org.ironsight.wpplugin.expandLayerTool.operations;
 
-import org.ironsight.wpplugin.expandLayerTool.Gui.GradientDisplay;
-import org.ironsight.wpplugin.expandLayerTool.Gui.GradientEditor;
+import org.ironsight.wpplugin.expandLayerTool.Gui.OperationPanel;
 import org.ironsight.wpplugin.expandLayerTool.pathing.RingFinder;
 import org.pepsoft.worldpainter.Tile;
 import org.pepsoft.worldpainter.layers.Annotations;
@@ -10,13 +9,8 @@ import org.pepsoft.worldpainter.selection.SelectionBlock;
 import org.pepsoft.worldpainter.selection.SelectionChunk;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
-import java.net.URI;
 import java.util.*;
 
 import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
@@ -24,9 +18,10 @@ import static org.pepsoft.worldpainter.Constants.TILE_SIZE_BITS;
 
 public class SelectEdgeOperation extends MouseOrTabletOperation {
     static final int CYAN = 9;
-    private static final String NAME = "Select Edge Operation";
-    private static final String DESCRIPTION = "<html>Select the edge of all blocks of th laye and expand/reduce them " +
-            "<br>" + "with a spraypaint gradient, then paint it on the map as output layer.</html>";
+    public static final String NAME = "Select Edge Operation";
+    public static final String DESCRIPTION = "1. Selects the edge of all blocks touching the input layer\n" +
+            "2. expands the edge with a spraypaint gradient \n" +
+            "3. paints it on the map as output layer";
     private static final String ID = "select_edge_operation";
     private final SelectEdgeOptions options = new SelectEdgeOptions();
     Random r = new Random();
@@ -37,219 +32,10 @@ public class SelectEdgeOperation extends MouseOrTabletOperation {
 
     @Override
     public JPanel getOptionsPanel() {
-        JPanel main = new JPanel();
-        main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
-
-        JPanel panel = new JPanel(new GridLayout(0, 2));
-
-        {   //SPINNER WIDTH
-            {
-                JLabel label = new JLabel("width:");
-                panel.add(label);
-                // Create a SpinnerNumberModel for numeric input
-                SpinnerNumberModel model = new SpinnerNumberModel(options.width, 1, 100, 1f); // initialValue, min,
-                // max, step
-                JSpinner spinner = new JSpinner(model);
-                // Add a change listener to capture value changes
-                spinner.addChangeListener(new ChangeListener() {
-                    @Override
-                    public void stateChanged(ChangeEvent e) {
-                        // Retrieve the current value (im to lazy to figure out when its a double or a float)
-                        options.width = ((Double) spinner.getValue()).intValue();
-                    }
-                });
-                spinner.setToolTipText("how wide the output edge should be");
-                panel.add(spinner);
-            }
-        }
-
-        {
-            // Create a JComboBox with options
-            String[] listOptions = {"Outwards", "Inwards", "Both", "Out and keep"};
-            JComboBox<String> dropdown = new JComboBox<>(listOptions);
-
-// Map the list options to the corresponding directions
-            Map<String, SelectEdgeOptions.DIRECTION> directionMap = new HashMap<>();
-            directionMap.put("Outwards", SelectEdgeOptions.DIRECTION.OUTWARD);
-            directionMap.put("Inwards", SelectEdgeOptions.DIRECTION.INWARD);
-            directionMap.put("Both", SelectEdgeOptions.DIRECTION.BOTH);
-            directionMap.put("Out and keep", SelectEdgeOptions.DIRECTION.OUT_AND_KEEP);
-
-// Reverse map to find the key by value
-            Map<SelectEdgeOptions.DIRECTION, String> reverseMap = new HashMap<>();
-            directionMap.forEach((key, value) -> reverseMap.put(value, key));
-
-// Add an action listener to handle option selection
-            dropdown.addActionListener(e -> {
-                String selectedOption = (String) dropdown.getSelectedItem();
-                if (selectedOption != null) {
-                    options.dir = directionMap.get(selectedOption);
-                }
-            });
-
-// Set the selected item based on the current direction
-            dropdown.setSelectedItem(reverseMap.get(options.dir));
-
-            panel.add(new JLabel("direction:"));
-            dropdown.setToolTipText("in which direction the tool will grow the input layer");
-            panel.add(dropdown);
-        }
-
-        {   // INPUT
-            JButton button = new JButton();
-            button.setText(options.inputFromSelection ? "selection" : "cyan annotation");
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    options.inputFromSelection = !options.inputFromSelection;
-                    button.setText(options.inputFromSelection ? "selection" : "cyan annotation");
-                }
-            });
-            button.setToolTipText("the layer to be used as an input");
-            panel.add(new JLabel("input:"));
-            panel.add(button);
-        }
-
-        {   // OUTPUT
-            JButton button = new JButton();
-            button.setText(options.outputAsSelection ? "selection" : "cyan annotation");
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    options.outputAsSelection = !options.outputAsSelection;
-                    button.setText(options.outputAsSelection ? "selection" : "cyan annotation");
-
-                }
-            });
-            panel.add(new JLabel("output:"));
-            button.setToolTipText("the layer to be used as output. Will be painted on the map when the tool is run.");
-            panel.add(button);
-        }
-
-        {
-            JButton button3 = new JButton("edit");
-            // Add action listeners to handle button click events
-            button3.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    showArrayEditorDialog();
-                }
-            });
-            panel.add(new JLabel("gradient"));
-            button3.setToolTipText("the gradient that is used when the layer is expanded.");
-            panel.add(button3);
-        }
-        {   // CLEAN OUTPUT
-            JCheckBox checkBox = new JCheckBox("clear output layer");
-            checkBox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    options.cleanOutput = checkBox.isSelected();
-                }
-            });
-            checkBox.setSelected(options.cleanOutput);
-            panel.add(checkBox);
-        }
-        {   //CLEAN INPUT
-            JCheckBox checkBox = new JCheckBox("clear input layer");
-            checkBox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    options.cleanInput = checkBox.isSelected();
-                }
-            });
-            checkBox.setSelected(options.cleanInput);
-            panel.add(checkBox);
-        }
-
-        {   //HELP BUTTON
-            JButton button3 = new JButton("Help");
-            // Add action listeners to handle button click events
-            button3.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        // The GitHub URL to open
-                        String url = "https://github.com/IR0NSIGHT/ExpandLayerPlugin/blob/master/README.md";
-                        // Open the URL in the default browser
-                        Desktop.getDesktop().browse(new URI(url));
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        Component frame = SwingUtilities.getRoot(main);
-                        JOptionPane.showMessageDialog(frame, "Failed to open online help URL: " + ex.getMessage(),
-                                "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            });
-            button3.setToolTipText("open online help");
-            panel.add(button3);
-        }
-
-        {   //EXECUTE BUTTON
-            JButton button3 = new JButton("Run");
-            // Add action listeners to handle button click events
-            button3.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    run();
-                }
-            });
-            button3.setToolTipText("execute the tool operation and place down the expanded output layer");
-            panel.add(button3);
-        }
-
-        for (Component p : panel.getComponents()) {
-            if (p instanceof JLabel) {
-                ((JLabel) p).setHorizontalAlignment(SwingConstants.CENTER); // Horizontal center
-                ((JLabel) p).setVerticalAlignment(SwingConstants.CENTER);   // Vertical center
-            }
-            if (p instanceof JComboBox) {
-                ((JLabel) ((JComboBox) p).getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
-            }
-        }
-
-        JLabel header = new JLabel(NAME);
-        header.setFont(new Font("Arial", Font.BOLD, 24));
-        main.add(header);
-
-        JLabel text = new JLabel(DESCRIPTION);
-        main.add(text);
-        main.add(panel);
-        main.setPreferredSize(new Dimension(200, 400));
-        return main;
+        OperationPanel panel = new OperationPanel(options);
+        panel.setRunner(this::run);
+        return panel;
     }
-
-    public void showArrayEditorDialog() {
-        // Create the dialog
-        JDialog dialog = new JDialog((Frame) null, "Edit Arrays", true); // Modal dialog
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setLayout(new BorderLayout(10, 10));
-
-        // Create the PixelGrid instance with the gradient
-        GradientDisplay pixelGrid = new GradientDisplay(options.gradient);
-        // Create the JFrame to render the PixelGrid
-        JFrame frame = new JFrame("Pixel Grid with Gradient");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setMinimumSize(new Dimension(500, 500));
-
-        frame.setLayout(new BorderLayout());
-
-        JPanel gridPanel = new JPanel(new GridLayout(0, 2));
-        gridPanel.add(pixelGrid);
-        gridPanel.add(new GradientEditor(options.gradient, pixelGrid::setGradient, grad -> {
-            this.options.gradient = grad;
-            dialog.dispose();
-        }));
-
-        // Add components to the dialog
-        dialog.add(gridPanel, BorderLayout.NORTH);
-
-        // Set dialog size and make it visible
-        dialog.pack();
-        dialog.setLocationRelativeTo(null); // Center on screen
-        dialog.setVisible(true);
-    }
-
 
     @Override
     protected void activate() throws PropertyVetoException {
@@ -367,17 +153,17 @@ public class SelectEdgeOperation extends MouseOrTabletOperation {
 
     }
 
-    private static class SelectEdgeOptions {
-        int width = 3;
-        DIRECTION dir = DIRECTION.OUTWARD;
-        boolean cleanOutput = false;
-        boolean cleanInput = false;
-        boolean outputAsSelection = true;
-        boolean inputFromSelection = false;
-        Gradient gradient = new Gradient(new float[]{0.01f, 0.15f, 0.25f, 0.5f, 1f}, new float[]{1f, 0.4f, 0.2f, 0.1f
+    public static class SelectEdgeOptions {
+        public int width = 3;
+        public DIRECTION dir = DIRECTION.OUTWARD;
+        public boolean cleanOutput = false;
+        public boolean cleanInput = false;
+        public boolean outputAsSelection = true;
+        public boolean inputFromSelection = false;
+        public Gradient gradient = new Gradient(new float[]{0.01f, 0.15f, 0.25f, 0.5f, 1f}, new float[]{1f, 0.4f, 0.2f, 0.1f
                 , 0.03f});
 
-        enum DIRECTION {
+        public enum DIRECTION {
             OUTWARD, INWARD, BOTH, OUT_AND_KEEP
         }
     }

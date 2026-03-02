@@ -78,6 +78,15 @@ public class NumericSlider extends javax.swing.JPanel {
         updateGui();
     }
 
+    public static void main(String[] args) {
+        JFrame frame = new JFrame();
+        frame.setSize(400,400);
+        NumericSlider slider = new NumericSlider();
+        frame.add(slider);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
