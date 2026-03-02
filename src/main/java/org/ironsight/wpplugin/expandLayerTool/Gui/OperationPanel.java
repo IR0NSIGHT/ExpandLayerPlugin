@@ -220,23 +220,20 @@ public class OperationPanel extends JPanel {
             textArea.setMaximumSize(new Dimension(textArea.getPreferredSize().width,50));
         }
 
-        JPanel content = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        content.add(header);
-        content.add(textArea);
-        content.add(twoColumnsPanel);
+        JPanel content = new JPanel();
+        outer.add(header);
+        outer.add(textArea);
+        outer.add(twoColumnsPanel);
         gradientDisplay = new GradientDisplay(options.gradient);
         gradientDisplay.setPreferredSize(new Dimension(twoColumnsPanel.getPreferredSize().width,100));
-        content.add(gradientDisplay);
-        content.add(Box.createVerticalGlue()); // extra space at the bottom
-        Arrays.stream(content.getComponents())
+        outer.add(gradientDisplay);
+        //content.add(Box.createVerticalGlue()); // extra space at the bottom
+        Arrays.stream(outer.getComponents())
                 .map(Component::getPreferredSize)
                 .map(Dimension::getWidth)
                 .max(Comparator.comparing(w -> w))
-                .ifPresent(maxW -> content.setPreferredSize(new Dimension(maxW.intValue(), Integer.MAX_VALUE)));
-        content.setMaximumSize(content.getPreferredSize());
-        content.setMinimumSize(content.getPreferredSize());
-        System.out.println(content.getMaximumSize());
-        outer.add(content);
+                .ifPresent(maxW -> outer.setPreferredSize(new Dimension(maxW.intValue(), outer.getPreferredSize().height)));
+        outer.setMaximumSize(content.getPreferredSize());
     }
 
     private GradientDisplay gradientDisplay;
