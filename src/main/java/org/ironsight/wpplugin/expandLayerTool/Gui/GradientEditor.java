@@ -12,26 +12,31 @@ import java.util.function.Consumer;
 public class GradientEditor extends JPanel {
     private final Consumer<Gradient> submit;
     private final Consumer<Gradient> update;
-    JLabel[] warnings = new JLabel[]{new JLabel("WARNING:"), new JLabel("some entries are invalid"), new JLabel(),
-            new JLabel()};
+    private final Runnable onCancel;
+    JLabel[] warnings = new JLabel[]{new JLabel("WARNING:"), new JLabel("some entries are invalid"), new JLabel(), new JLabel()};
     private Gradient gradient;
     private boolean invalid;
     private boolean blockEventhandling;
     private NumericSlider[] valueSliders;
     private NumericSlider[] positionSliders;
 
-    public GradientEditor(Gradient gradient, Consumer<Gradient> update, Consumer<Gradient> submit) {
+    public GradientEditor(Gradient gradient, Consumer<Gradient> update, Consumer<Gradient> submit, Runnable onCancel) {
         this.gradient = gradient;
         this.update = update;
         this.submit = submit;
+        this.onCancel = onCancel;
         setup();
     }
 
     public static void main(String[] args) {
-        Gradient grad = new Gradient(new float[]{1,2,3,4,5},new float[]{10,20,30,40,50});
-        GradientEditor editor = new GradientEditor(grad,
-                g -> { System.out.println("UPDATE GRADIENT: " + g)        ;},
-                g -> { System.out.println("SUBMIT GRADIENT: " + g)        ;});
+        Gradient grad = new Gradient(new float[]{1, 2, 3, 4, 5}, new float[]{10, 20, 30, 40, 50});
+        GradientEditor editor = new GradientEditor(grad, g -> {
+            System.out.println("UPDATE GRADIENT: " + g);
+        }, g -> {
+            System.out.println("SUBMIT GRADIENT: " + g);
+        }, () -> {
+            System.out.println("CANCEL");
+        });
         JFrame frame = new JFrame("gradient editor test");
         frame.add(editor);
         frame.pack();
@@ -116,9 +121,10 @@ public class GradientEditor extends JPanel {
         }
         {
             JButton submitButton = new JButton("Submit");
+            submitButton.addActionListener((ActionEvent e) -> submit.accept(this.gradient));
             JButton cancelButton = new JButton("Cancel");
-            submitButton.addActionListener((ActionEvent e) -> {
-                submit.accept(this.gradient);
+            cancelButton.addActionListener(e -> {
+                onCancel.run();
             });
             addRow.accept(new JComponent[]{submitButton, cancelButton});
         }
@@ -183,7 +189,9 @@ public class GradientEditor extends JPanel {
     }
 
     private void onSliderInputChange() {
-        if (blockEventhandling) return;
+        if (blockEventhandling) {
+            return;
+        }
         for (int i = 0; i < gradient.positions.length; i++) {
             gradient.values[i] = valueSliders[i].getValue() / 100f;
             gradient.positions[i] = positionSliders[i].getValue() / 100f;

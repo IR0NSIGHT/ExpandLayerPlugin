@@ -18,25 +18,8 @@ import static org.ironsight.wpplugin.expandLayerTool.operations.SelectEdgeOperat
 
 public class OperationPanel extends JPanel {
     private SelectEdgeOperation.SelectEdgeOptions options;
-
-    public void setRunner(Runnable runner) {
-        this.runner = runner;
-    }
-
-    public static void main(String[] args) {
-        SelectEdgeOperation.SelectEdgeOptions options = new SelectEdgeOperation.SelectEdgeOptions();
-
-        OperationPanel panel = new OperationPanel(options);
-        panel.setRunner(() -> {
-            System.out.println("Running operation");
-        });
-        JFrame frame = new JFrame("gradient editor test");
-        frame.add(panel);
-        frame.setSize(new Dimension(300,1000));
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-    }
+    private GradientDisplay gradientDisplay;
+    private Runnable runner;
 
     public OperationPanel(SelectEdgeOperation.SelectEdgeOptions options) {
         this.options = options;
@@ -62,18 +45,18 @@ public class OperationPanel extends JPanel {
             String[] listOptions = {"Outwards", "Inwards", "Both", "Out and keep"};
             JComboBox<String> dropdown = new JComboBox<>(listOptions);
 
-// Map the list options to the corresponding directions
+            // Map the list options to the corresponding directions
             Map<String, SelectEdgeOperation.SelectEdgeOptions.DIRECTION> directionMap = new HashMap<>();
             directionMap.put("Outwards", SelectEdgeOperation.SelectEdgeOptions.DIRECTION.OUTWARD);
             directionMap.put("Inwards", SelectEdgeOperation.SelectEdgeOptions.DIRECTION.INWARD);
             directionMap.put("Both", SelectEdgeOperation.SelectEdgeOptions.DIRECTION.BOTH);
             directionMap.put("Out and keep", SelectEdgeOperation.SelectEdgeOptions.DIRECTION.OUT_AND_KEEP);
 
-// Reverse map to find the key by value
+            // Reverse map to find the key by value
             Map<SelectEdgeOperation.SelectEdgeOptions.DIRECTION, String> reverseMap = new HashMap<>();
             directionMap.forEach((key, value) -> reverseMap.put(value, key));
 
-// Add an action listener to handle option selection
+            // Add an action listener to handle option selection
             dropdown.addActionListener(e -> {
                 String selectedOption = (String) dropdown.getSelectedItem();
                 if (selectedOption != null) {
@@ -81,7 +64,7 @@ public class OperationPanel extends JPanel {
                 }
             });
 
-// Set the selected item based on the current direction
+            // Set the selected item based on the current direction
             dropdown.setSelectedItem(reverseMap.get(options.dir));
 
             twoColumnsPanel.add(new JLabel("direction:"));
@@ -93,8 +76,7 @@ public class OperationPanel extends JPanel {
             JButton button = new JButton();
             button.setText(options.inputFromSelection ? "selection" : "cyan annotation");
             button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                @Override public void actionPerformed(ActionEvent e) {
                     options.inputFromSelection = !options.inputFromSelection;
                     button.setText(options.inputFromSelection ? "selection" : "cyan annotation");
                 }
@@ -108,8 +90,7 @@ public class OperationPanel extends JPanel {
             JButton button = new JButton();
             button.setText(options.outputAsSelection ? "selection" : "cyan annotation");
             button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                @Override public void actionPerformed(ActionEvent e) {
                     options.outputAsSelection = !options.outputAsSelection;
                     button.setText(options.outputAsSelection ? "selection" : "cyan annotation");
 
@@ -124,8 +105,7 @@ public class OperationPanel extends JPanel {
             JButton button3 = new JButton("edit");
             // Add action listeners to handle button click events
             button3.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                @Override public void actionPerformed(ActionEvent e) {
                     showArrayEditorDialog();
                 }
             });
@@ -136,8 +116,7 @@ public class OperationPanel extends JPanel {
         {   // CLEAN OUTPUT
             JCheckBox checkBox = new JCheckBox("clear output layer");
             checkBox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                @Override public void actionPerformed(ActionEvent e) {
                     options.cleanOutput = checkBox.isSelected();
                 }
             });
@@ -147,8 +126,7 @@ public class OperationPanel extends JPanel {
         {   //CLEAN INPUT
             JCheckBox checkBox = new JCheckBox("clear input layer");
             checkBox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                @Override public void actionPerformed(ActionEvent e) {
                     options.cleanInput = checkBox.isSelected();
                 }
             });
@@ -161,8 +139,7 @@ public class OperationPanel extends JPanel {
             final Component main = this;
             // Add action listeners to handle button click events
             button3.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                @Override public void actionPerformed(ActionEvent e) {
                     try {
                         // The GitHub URL to open
                         String url = "https://github.com/IR0NSIGHT/ExpandLayerPlugin/blob/master/README.md";
@@ -171,8 +148,7 @@ public class OperationPanel extends JPanel {
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         Component frame = SwingUtilities.getRoot(main);
-                        JOptionPane.showMessageDialog(frame, "Failed to open online help URL: " + ex.getMessage(),
-                                "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Failed to open online help URL: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
@@ -184,8 +160,9 @@ public class OperationPanel extends JPanel {
             JButton button3 = new JButton("Run");
             // Add action listeners to handle button click events
             button3.addActionListener(e -> {
-                if (runner != null)
+                if (runner != null) {
                     runner.run();
+                }
             });
             button3.setToolTipText("execute the tool operation and place down the expanded output layer");
             twoColumnsPanel.add(button3);
@@ -210,14 +187,14 @@ public class OperationPanel extends JPanel {
             header.add(label);
         }
 
-        JTextArea textArea = new JTextArea(DESCRIPTION +  "\n\nv"+VERSION, 4, 20);
+        JTextArea textArea = new JTextArea(DESCRIPTION + "\n\nv" + VERSION, 4, 20);
         {
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
             textArea.setEditable(false);
             textArea.setOpaque(false);   // Optional: remove background
             textArea.setBorder(null);    // Optional: remove border
-            textArea.setMaximumSize(new Dimension(textArea.getPreferredSize().width,50));
+            textArea.setMaximumSize(new Dimension(textArea.getPreferredSize().width, 50));
         }
 
         JPanel content = new JPanel();
@@ -225,7 +202,7 @@ public class OperationPanel extends JPanel {
         outer.add(textArea);
         outer.add(twoColumnsPanel);
         gradientDisplay = new GradientDisplay(options.gradient);
-        gradientDisplay.setPreferredSize(new Dimension(twoColumnsPanel.getPreferredSize().width,100));
+        gradientDisplay.setPreferredSize(new Dimension(twoColumnsPanel.getPreferredSize().width, 100));
         outer.add(gradientDisplay);
         //content.add(Box.createVerticalGlue()); // extra space at the bottom
         Arrays.stream(outer.getComponents())
@@ -235,9 +212,6 @@ public class OperationPanel extends JPanel {
                 .ifPresent(maxW -> outer.setPreferredSize(new Dimension(maxW.intValue(), outer.getPreferredSize().height)));
         outer.setMaximumSize(content.getPreferredSize());
     }
-
-    private GradientDisplay gradientDisplay;
-    private Runnable runner;
 
     public void showArrayEditorDialog() {
         // Create the dialog
@@ -249,10 +223,12 @@ public class OperationPanel extends JPanel {
         GradientDisplay pixelGrid = new GradientDisplay(options.gradient);
         JPanel gridPanel = new JPanel(new GridLayout(0, 2));
         gridPanel.add(pixelGrid);
-        gridPanel.add(new GradientEditor(options.gradient, g -> {pixelGrid.setGradient(g); gradientDisplay.setGradient(g);}, grad -> {
-            this.options.gradient = grad;
+        gridPanel.add(new GradientEditor(options.gradient, pixelGrid::setGradient, g -> {
+            pixelGrid.setGradient(g);
+            gradientDisplay.setGradient(g);
+            this.options.gradient = g;
             dialog.dispose();
-        }));
+        }, dialog::dispose));
 
         // Add components to the dialog
         dialog.add(gridPanel, BorderLayout.NORTH);
@@ -262,5 +238,24 @@ public class OperationPanel extends JPanel {
         // Set dialog size and make it visible
         dialog.setLocationRelativeTo(null); // Center on screen
         dialog.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SelectEdgeOperation.SelectEdgeOptions options = new SelectEdgeOperation.SelectEdgeOptions();
+
+        OperationPanel panel = new OperationPanel(options);
+        panel.setRunner(() -> {
+            System.out.println("Running operation");
+        });
+        JFrame frame = new JFrame("gradient editor test");
+        frame.add(panel);
+        frame.setSize(new Dimension(300, 1000));
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+
+    public void setRunner(Runnable runner) {
+        this.runner = runner;
     }
 }
